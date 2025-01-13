@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراسلة متطورة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e9e9e9;
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            color: #444;
+        }
+        #chat-box {
+            width: 90%;
+            height: 400px;
+            border: 2px solid #ccc;
+            margin: 20px auto;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 8px;
+        }
+        .message {
+            display: flex;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 70%;
+            position: relative;
+            cursor: pointer;
+        }
+        .sender-me {
+            background-color: #d1f5d3;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .sender-other {
+            background-color: #f5d3d3;
+            align-self: flex-start;
+        }
+        .reaction-menu {
+            display: none;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .reaction-menu span {
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 8px 12px;
+            margin-left: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>مراسلة متطورة</h1>
+    <div id="chat-box"></div>
+    <form id="chat-form">
+        <input type="text" id="message" placeholder="اكتب رسالتك هنا..." required>
+        <button type="submit">➤</button>
+    </form>
+    <script>
+        let isMyTurn = true;
+        const chatBox = document.getElementById('chat-box');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message');
+        const emojiList = ['😂', '💙', '👍', '💔', '🙏', '🤔'];
+        
+        function createMessageElement(message, senderClass) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${senderClass}`;
+            messageElement.textContent = message;
+
+            const reactionMenu = document.createElement('div');
+            reactionMenu.className = 'reaction-menu';
+            reactionMenu.innerHTML = emojiList.map(emoji => `<span>${emoji}</span>`).join(' ');
+            
+            let currentReaction = null;
+            messageElement.appendChild(reactionMenu);
+            
+            messageElement.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                setTimeout(() => {
+                    reactionMenu.style.display = 'block';
+                }, 500);
+            });
+
+            reactionMenu.addEventListener('click', (e) => {
+                const selectedEmoji = e.target.textContent.trim();
+                if (emojiList.includes(selectedEmoji)) {
+                    if (currentReaction) {
+                        currentReaction.remove();
+                    }
+                    currentReaction = document.createElement('span');
+                    currentReaction.textContent = ` ${selectedEmoji}`;
+                    currentReaction.style.marginLeft = '5px';
+                    messageElement.appendChild(currentReaction);
+                    reactionMenu.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!reactionMenu.contains(e.target) && e.target !== messageElement) {
+                    reactionMenu.style.display = 'none';
+                }
+            });
+
+            return messageElement;
+        }
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                const senderClass = isMyTurn ? 'sender-me' : 'sender-other';
+                chatBox.appendChild(createMessageElement(message, senderClass));
+                messageInput.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+                isMyTurn = !isMyTurn;
+            }
+        });
+    </script>
+</body>
+</html>
